@@ -1,0 +1,61 @@
+# Q.1  Show the percentage of wins of each bidder in the order of highest to lowest percentage.
+
+
+SELECT BD.BIDDER_ID ,COUNT(BID_STATUS) AS BID_WON,SUM(NO_OF_BIDS) AS TOTAL_BIDS, COUNT(BID_STATUS)/SUM(NO_OF_BIDS)*100
+AS PERCENTAGE_OF_WINS FROM ipl_bidding_details BD JOIN ipl_bidder_points BP 
+ON BD.BIDDER_ID = BP.BIDDER_ID 
+WHERE BID_STATUS = 'WON' GROUP BY BIDDER_ID ORDER BY PERCENTAGE_OF_WINS DESC;
+
+# Q.2.	Display the number of matches conducted at each stadium with stadium name, city from the database.
+
+
+SELECT COUNT(MATCH_ID), MS.STADIUM_ID, S.STADIUM_NAME,S.CITY FROM ipl_match_schedule AS MS 
+JOIN ipl_stadium AS S ON MS.STADIUM_ID = S.STADIUM_ID GROUP BY STADIUM_ID;
+
+
+# Q.3.	In a given stadium, what is the percentage of wins by a team which has won the toss?
+
+SELECT STADIUM_ID 'STADIUM ID', STADIUM_NAME 'STADIUM NAME',CITY,
+(SELECT COUNT(*) FROM ipl_match AS M JOIN ipl_match_schedule MS ON M.MATCH_ID = MS.MATCH_ID 
+WHERE MS.STADIUM_ID = S.STADIUM_ID AND (TOSS_WINNER = MATCH_WINNER)) / (SELECT COUNT(*) FROM ipl_match_schedule MS WHERE 
+MS.STADIUM_ID = S.STADIUM_ID)*100 AS 'Percentage of wins by teams who won the toss(%)' FROM ipl_stadium S;
+
+# Q.4.	Show the total bids along with bid team and team name.
+
+SELECT BID_TEAM ,SUM(NO_OF_BIDS) AS TOTAL_BIDS, TEAM_NAME FROM ipl_bidder_points IBP JOIN ipl_bidding_details IBD
+JOIN ipl_team IPT ON IBD.BID_TEAM = IPT.TEAM_ID USING (BIDDER_ID) GROUP BY BID_TEAM;
+
+
+# Q.5.	Show the team id who won the match as per the win details.
+SELECT *FROM ipl_match;
+
+SELECT MATCH_ID, IF(ipl_match.MATCH_WINNER = 1, ipl_match.TEAM_ID1,ipl_match.TEAM_ID2) AS WINNING_TEAM_ID FROM ipl_match;
+
+# Q.6.	Display total matches played, total matches won and total matches lost by team along with its team name.
+
+select *from ipl_match_schedule; 
+select *from ipl_team;
+select *from ipl_team_standings;
+
+SELECT IT.TEAM_ID, IT.TEAM_NAME , SUM(MATCHES_PLAYED) AS TOTAL_MATCHES_PLAYED, SUM(MATCHES_WON) AS TOTAL_MATCHES_WON ,
+SUM(MATCHES_LOST) AS TOTAL_MATCHES_LOST FROM ipl_team_standings IPT JOIN ipl_team IT ON IPT.TEAM_ID = IT.TEAM_ID
+GROUP BY TEAM_ID;
+
+
+# Q.7.	Display the bowlers for Mumbai Indians team.
+select *from IPL_Player; 
+select *from IPL_Team_players;  
+select *from ipl_team;
+
+SELECT IP.PLAYER_ID, IP.PLAYER_NAME, ITP.PLAYER_ROLE, ITP.TEAM_ID, TEAM_NAME FROM ipl_player IP JOIN ipl_team_players ITP ON 
+IP.PLAYER_ID = ITP.PLAYER_ID JOIN ipl_team ITM ON ITP.TEAM_ID = ITM.TEAM_ID
+WHERE PLAYER_ROLE LIKE '%BOWLER%' AND TEAM_NAME LIKE '%MUMBAI INDIANS%' ;
+ 
+# Q. 8.	How many all-rounders are there in each team, Display the teams with more than 4 all-rounder in descending order.
+select *from IPL_Team_players; 
+select *from ipl_player; 
+select *from IPL_Team;  
+
+SELECT PLAYER_ROLE, TEAM_NAME, COUNT(PLAYER_ROLE) AS NO_OF_ALLROUNDERS FROM ipl_player IP JOIN ipl_team_players ITP ON 
+IP.PLAYER_ID = ITP.PLAYER_ID JOIN ipl_team IT ON ITP.TEAM_ID = IT.TEAM_ID
+WHERE PLAYER_ROLE = 'All-rounder' GROUP BY TEAM_NAME HAVING NO_OF_ALLROUNDERS > 4 ORDER BY NO_OF_ALLROUNDERS DESC ;
